@@ -1,0 +1,68 @@
+﻿@page "/products/create"
+@using Microsoft.EntityFrameworkCore
+
+@rendermode InteractiveServer
+
+@inject ApplicationDbContext Context
+@inject NavigationManager Navigation
+
+<h2>Novo cadastro de produto</h2>
+
+<EditForm Model="@_model" OnValidSubmit="OnSubmitAsync">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">Nome do produto</label>
+        <InputText @bind-Value="_model.Title" class="form-control" />
+        <ValidationMessage For="@(() => _model.Title)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Descrição</label>
+        <InputText @bind-Value="_model.Description" class="form-control" />
+        <ValidationMessage For="@(() => _model.Description)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Preço (R$)</label>
+        <InputNumber @bind-Value="_model.Price" class="form-control" />
+        <ValidationMessage For="@(() => _model.Price)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Categoria</label>
+        <InputSelect @bind-Value="_model.CategoryId" class="form-select">
+            @foreach(var category in _categories)
+            {
+                <option value="@category.Id">@category.Title</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => _model.CategoryId)" />
+    </div>
+
+    <div class="mb-3">
+        <button type="submit" class="btn btn-outline-primary">Criar</button>
+        <a href="/products">Cancelar</a>
+    </div>
+</EditForm>
+
+@code {
+    private Product _model { get; set; } = new();
+    private IEnumerable<Category> _categories = Enumerable.Empty<Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await Context.Categories
+                                .AsNoTracking()
+                                .OrderBy(c => c.Title)
+                                .ToListAsync();
+    }
+
+    private async Task OnSubmitAsync()
+    {
+        await Context.Products.AddAsync(_model);
+        await Context.SaveChangesAsync();
+
+        Navigation.NavigateTo("products");
+    }
+}
