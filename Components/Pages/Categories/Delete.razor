@@ -6,6 +6,8 @@
 @inject ApplicationDbContext Context
 @inject NavigationManager Navigation
 
+@attribute [Authorize]
+
 <h2>Deseja excluir a categoria?</h2>
 
 @if (_model is null)

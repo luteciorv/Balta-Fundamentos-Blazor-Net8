@@ -5,6 +5,8 @@
 @inject ApplicationDbContext Context
 @inject NavigationManager Navigation
 
+@attribute [Authorize]
+
 <h2>Edição de categoria</h2>
 
 @if (_model is null)

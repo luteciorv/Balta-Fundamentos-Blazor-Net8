@@ -6,6 +6,8 @@
 @inject ApplicationDbContext Context
 @inject NavigationManager Navigation
 
+@attribute [Authorize]
+
 @if(_model is null)
 {
     <div class="mb-3">
