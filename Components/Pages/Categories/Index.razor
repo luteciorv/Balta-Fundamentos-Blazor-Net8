@@ -1,0 +1,55 @@
+﻿@page "/categories"
+@using Microsoft.EntityFrameworkCore
+
+@inject ApplicationDbContext Context
+
+@attribute [StreamRendering(true)]
+
+<h2 class="text-center">Categorias</h2>
+
+<a href="/categories/create" class="btn btn-outline-primary">Cadastrar nova categoria</a>
+
+<br />
+
+@if (!_categories.Any())
+{
+    <p class="text-center">
+        Carregando as categorias
+    </p>
+}
+else
+{
+    <table class="table table-bordered shadow">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <td>Nome</td>
+                <td></td>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var category in _categories)
+            {
+                <tr>
+                    <td>@category.Id</td>
+                    <td>@category.Title</td>
+                    <td class="text-center">
+                        <a href="/categories/edit/@category.Id" class="btn btn-outline-info">Editar</a>
+                        &nbsp;&nbsp;
+                        <a href="/categories/delete/@category.Id" class="btn btn-outline-danger">Excluir</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Category> _categories = Enumerable.Empty<Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await Context.Categories.AsNoTracking().ToListAsync();
+    }
+}
