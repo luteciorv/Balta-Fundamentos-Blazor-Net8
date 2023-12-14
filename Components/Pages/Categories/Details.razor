@@ -1,0 +1,51 @@
+﻿@page "/categories/{id:int}"
+@using Microsoft.EntityFrameworkCore
+
+@rendermode InteractiveServer
+
+@inject ApplicationDbContext Context
+
+<h2>Edição de categoria</h2>
+
+@if (_model is null)
+{
+    <div class="mb-3">
+        <p class="alert alert-danger" role="alert">
+            Categoria não encontrada
+        </p>
+    </div>
+
+    <div class="mb-3">
+        <a href="/categories" class="btn btn-outline-danger">Voltar</a>
+    </div>
+}
+else
+{
+    <div>
+        <div class="mb-3">
+            <label class="form-label">Código</label>
+            <InputNumber @bind-Value="_model.Id" class="form-control" disabled />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nome da categoria</label>
+            <InputText @bind-Value="_model.Title" class="form-control" disabled />
+        </div>
+
+        <div class="mb-3">
+            <a href="/categories" class="btn btn-outline-danger">Voltar</a>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Category? _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _model = await Context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == Id);
+    }
+}
