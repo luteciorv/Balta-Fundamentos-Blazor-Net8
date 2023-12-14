@@ -1,0 +1,111 @@
+﻿@page "/products/edit/{id:int}"
+@using Microsoft.EntityFrameworkCore
+
+@rendermode InteractiveServer
+
+@inject ApplicationDbContext Context
+@inject NavigationManager Navigation
+
+@if(_model is null)
+{
+    <div class="mb-3">
+        <div class="alert alert-danger" role="alert">
+            O produto de id @Id não foi encontrado
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <a href="/products" class="btn btn-outline-danger">Voltar</a>
+    </div>
+}
+
+else
+{
+    <h2>Edição do produto</h2>
+
+    <EditForm Model="@_model" OnValidSubmit="OnSubmitAsync">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label class="form-label">Nome do produto</label>
+            <InputText @bind-Value="_model.Title" class="form-control" />
+            <ValidationMessage For="@(() => _model.Title)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <InputText @bind-Value="_model.Description" class="form-control" />
+            <ValidationMessage For="@(() => _model.Description)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Preço (R$)</label>
+            <InputNumber @bind-Value="_model.Price" class="form-control" />
+            <ValidationMessage For="@(() => _model.Price)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Categoria</label>
+            <InputSelect @bind-Value="_model.CategoryId" class="form-select">
+                @foreach (var category in _categories)
+                {
+                    <option value="@category.Id">@category.Title</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => _model.CategoryId)" />
+        </div>
+
+        @if (_unexpectedError.Length > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @_unexpectedError
+            </div>
+        }
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-outline-primary">Salvar alterações</button>
+            <a href="/products" class="btn btn-outline-danger">Cancelar</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private string _unexpectedError = string.Empty;
+
+    private Product? _model { get; set; } = new();
+    private IEnumerable<Category> _categories = Enumerable.Empty<Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _unexpectedError = string.Empty;
+
+        _model = await Context.Products
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(p => p.Id == Id);
+
+        _categories = await Context.Categories
+                                .OrderBy(c => c.Title)
+                                .AsNoTracking()
+                                .ToListAsync();
+    }
+
+    private async Task OnSubmitAsync()
+    {
+        try
+        {
+            Context.Products.Update(_model!);
+            await Context.SaveChangesAsync();
+        }
+        catch(Exception ex)
+        {
+            _unexpectedError = $"Não foi possível atualizar os dados do Produto. Tente novamente mais tarde. Erro: {ex.Message}";
+            return;
+        }
+
+
+        Navigation.NavigateTo("products");
+    }
+}
